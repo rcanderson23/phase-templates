@@ -1,0 +1,25 @@
+version: v1
+metadata:
+  name: rust-builder
+commands:
+  - comment: Install native Linux build prerequisites
+    env:
+      - name: DEBIAN_FRONTEND
+        value: noninteractive
+    shell: |
+      set -eu
+      apt-get update
+      apt-get install -y --no-install-recommends \
+        build-essential ca-certificates curl git libssl-dev pkg-config
+      rm -rf /var/lib/apt/lists/*
+  - comment: Install Rust and the native target using rustup
+    env:
+      - name: RUSTUP_HOME
+        value: /opt/rustup
+      - name: CARGO_HOME
+        value: /usr/local
+    shell: |
+      set -eu
+      curl --fail --show-error --silent --location https://sh.rustup.rs -o /tmp/rustup-init.sh
+      sh /tmp/rustup-init.sh -y --no-modify-path --profile minimal --default-toolchain 1.100.0
+      rm /tmp/rustup-init.sh

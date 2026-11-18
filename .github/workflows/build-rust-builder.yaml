@@ -1,0 +1,24 @@
+name: Build Rust Builder
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    environment: beams
+    steps:
+      - uses: actions/checkout@v4
+      - uses: teleport-actions/setup@v2
+        with:
+          version: 18.11.10
+      - uses: teleport-actions/auth@v2
+        with:
+          proxy: carson-beams.beams.sh:443
+          token: phase-templates-github
+          allow-reissue: true
+      - run: tsh phase apply -f templates/rust/phase.yaml --no-console

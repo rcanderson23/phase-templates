@@ -1,0 +1,41 @@
+version: v1
+metadata:
+  name: rust-app-source
+  from: rust-builder
+files:
+  - from: ./source
+    to: /opt/rust-app-source
+---
+version: v1
+metadata:
+  name: rust-app
+  from: rust-app-source
+commands:
+  - comment: Compile and install the application
+    workdir: /opt/rust-app-source
+    env:
+      - name: RUSTUP_HOME
+        value: /opt/rustup
+      - name: CARGO_HOME
+        value: /tmp/cargo
+      - name: CARGO_TARGET_DIR
+        value: /tmp/target
+    shell: |
+      set -eu
+      export PATH="/usr/local/bin:$PATH"
+      cargo build --release --locked
+      install -D -m 755 "$CARGO_TARGET_DIR/release/rust-beam-app" /opt/rust-app/bin/rust-beam-app
+services:
+  - name: rust-app
+    type: background
+    context: runtime
+    command: /opt/rust-app/bin/rust-beam-app
+    workdir: /opt/rust-app
+  - name: publish-rust-app
+    type: background
+    context: runtime
+    shell: |
+      set -eu
+      curl --fail --silent --show-error --max-time 5 --retry 30 --retry-delay 1 --retry-connrefused \
+        http://127.0.0.1:8080/ > /dev/null
+      exec tsh beams publish "${BEAM_ID:?BEAM_ID is required}"

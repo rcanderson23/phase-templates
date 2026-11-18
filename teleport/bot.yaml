@@ -1,0 +1,8 @@
+kind: bot
+version: v1
+metadata:
+  name: phase-templates
+spec:
+  roles:
+    - beam-user
+  direct_unscoped_role_assignment: true
